@@ -29,9 +29,29 @@ async function run() {
     const userCollection = client.db("byteAndBlogDB").collection("users");
 
     // Users related API
+    app.get("/users", async (req, res) => {
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.post("/users", async (req, res) => {
       const newUser = req.body;
       const result = await userCollection.insertOne(newUser);
+      res.send(result);
+    });
+
+    app.patch("/users", async (req, res) => {
+      const email = req.body?.email;
+      const filter = { email };
+
+      const updatedDoc = {
+        $set: {
+          lastSignInTime: req.body?.lastSignInTime,
+        },
+      };
+
+      const result = await userCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
 
