@@ -16,7 +16,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
-    strict: true,
+    strict: false,
     deprecationErrors: true,
   },
 });
@@ -28,6 +28,7 @@ async function run() {
 
     const userCollection = client.db("byteAndBlogDB").collection("users");
     const blogCollection = client.db("byteAndBlogDB").collection("blogs");
+    await blogCollection.createIndex({ title: "text" });
 
     // Users related API
     app.get("/users", async (req, res) => {
@@ -57,6 +58,33 @@ async function run() {
     });
 
     // Blogs related api
+    app.get("/blogs", async (req, res) => {
+      // const cursor = blogCollection.find();
+      // const result = await cursor.toArray();
+      // res.send(result);
+
+      const { category, search } = req.query;
+      // console.log("category:", category);
+      // console.log("search:", search);
+
+      const query = {};
+
+      if (category) {
+        query.category = category;
+      }
+
+      if (search) {
+        query.$text = { $search: search };
+      }
+
+      try {
+        const cursor = blogCollection.find(query);
+        const result = await cursor.toArray();
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch blogs" });
+      }
+    });
     app.post("/blogs", async (req, res) => {
       const newBlog = req.body;
       const result = await blogCollection.insertOne(newBlog);
