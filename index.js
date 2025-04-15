@@ -27,6 +27,7 @@ async function run() {
     await client.connect();
 
     const userCollection = client.db("byteAndBlogDB").collection("users");
+    const blogCollection = client.db("byteAndBlogDB").collection("blogs");
 
     // Users related API
     app.get("/users", async (req, res) => {
@@ -52,6 +53,13 @@ async function run() {
       };
 
       const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    // Blogs related api
+    app.post("/blogs", async (req, res) => {
+      const newBlog = req.body;
+      const result = await blogCollection.insertOne(newBlog);
       res.send(result);
     });
 
