@@ -28,6 +28,9 @@ async function run() {
 
     const userCollection = client.db("byteAndBlogDB").collection("users");
     const blogCollection = client.db("byteAndBlogDB").collection("blogs");
+    const wishlistCollection = client
+      .db("byteAndBlogDB")
+      .collection("wishlist");
     await blogCollection.createIndex({ title: "text" });
 
     // Users related API
@@ -95,6 +98,23 @@ async function run() {
       const newBlog = req.body;
       const result = await blogCollection.insertOne(newBlog);
       res.send(result);
+    });
+
+    // Wishlist related API
+    app.post("/wishlist", async (req, res) => {
+      const { blogId, userEmail } = req.body;
+      // const userId = req.user.id; // Assuming auth middleware
+      console.log(blogId, userEmail);
+
+      try {
+        const result = await wishlistCollection.insertOne({
+          blogId,
+          userEmail,
+        });
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     // Send a ping to confirm a successful connection
