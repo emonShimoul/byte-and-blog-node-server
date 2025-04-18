@@ -31,6 +31,9 @@ async function run() {
     const wishlistCollection = client
       .db("byteAndBlogDB")
       .collection("wishlist");
+    const commentsCollection = client
+      .db("byteAndBlogDB")
+      .collection("comments");
     await blogCollection.createIndex({ title: "text" });
 
     // Users related API
@@ -100,7 +103,20 @@ async function run() {
       res.send(result);
     });
 
-    // Wishlist related API
+    // comments related apis
+    app.post("/comments", async (req, res) => {
+      const newComment = req.body;
+      const result = await commentsCollection.insertOne(newComment);
+      res.send(result);
+    });
+    app.get("/comments/:blogId", async (req, res) => {
+      const blogId = req.params.blogId;
+      const query = { blogId: blogId }; // Match the blogId field in the comments
+      const result = await commentsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // wishlist related apis
     app.post("/wishlist", async (req, res) => {
       const { blogId, userEmail } = req.body;
       // const userId = req.user.id; // Assuming auth middleware
