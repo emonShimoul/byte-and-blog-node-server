@@ -135,6 +135,28 @@ async function run() {
       res.send(result);
     });
 
+    // featured blogs
+    app.get("/featured-blogs", async (req, res) => {
+      try {
+        const blogs = await blogCollection.find().toArray();
+
+        // Add word count field
+        const blogsWithWordCount = blogs.map((blog) => {
+          const wordCount = blog?.longDesc?.split(/\s+/).length || 0;
+          return { ...blog, wordCount };
+        });
+
+        // Sort and take top 10
+        const topBlogs = blogsWithWordCount
+          .sort((a, b) => b.wordCount - a.wordCount)
+          .slice(0, 10);
+
+        res.send(topBlogs);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch featured blogs" });
+      }
+    });
+
     // wishlist related apis
     app.post("/wishlist", async (req, res) => {
       const { blogId, userEmail } = req.body;
