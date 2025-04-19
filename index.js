@@ -158,19 +158,59 @@ async function run() {
     });
 
     // wishlist related apis
-    app.post("/wishlist", async (req, res) => {
-      const { blogId, userEmail } = req.body;
-      // const userId = req.user.id; // Assuming auth middleware
-      console.log(blogId, userEmail);
+    app.get("/wishlist/:email", async (req, res) => {
+      const email = req.params.email;
 
       try {
-        const result = await wishlistCollection.insertOne({
+        const wishlistedBlogs = await wishlistCollection
+          .find({ userEmail: email })
+          .toArray();
+
+        res.send(wishlistedBlogs);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+        res.status(500).send({ message: "Failed to fetch wishlist" });
+      }
+    });
+
+    app.post("/wishlist", async (req, res) => {
+      const { blogId, userEmail } = req.body;
+
+      try {
+        // Check if this blog is already in the wishlist
+        const existing = await wishlistCollection.findOne({
           blogId,
           userEmail,
         });
+        if (existing) {
+          return res
+            .status(409)
+            .send({ message: "Already in your wishlist!!" });
+        }
+
+        // Get blog details from blogs collection
+        const blog = await blogCollection.findOne({
+          _id: new ObjectId(blogId),
+        });
+
+        if (!blog) {
+          return res.status(404).send({ message: "Blog not found" });
+        }
+
+        const wishlistItem = {
+          blogId,
+          userEmail,
+          title: blog.title,
+          imageUrl: blog.imageUrl,
+          category: blog.category,
+          shortDesc: blog.shortDesc,
+        };
+
+        const result = await wishlistCollection.insertOne(wishlistItem);
         res.send(result);
       } catch (error) {
-        console.log(error);
+        console.error(error);
+        res.status(500).send({ message: "Failed to add to wishlist" });
       }
     });
 
