@@ -157,6 +157,20 @@ async function run() {
       }
     });
 
+    // recent blogs for homepage
+    app.get("/recentBlogs", async (req, res) => {
+      try {
+        const blogs = await blogCollection
+          .find()
+          .sort({ _id: -1 }) // Assuming newer blogs have higher _id
+          .limit(6)
+          .toArray();
+        res.send(blogs);
+      } catch (error) {
+        res.status(500).send({ message: "Failed to fetch recent blogs" });
+      }
+    });
+
     // wishlist related apis
     app.get("/wishlist/:email", async (req, res) => {
       const email = req.params.email;
