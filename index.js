@@ -214,6 +214,28 @@ async function run() {
       }
     });
 
+    // wishlist delete API
+    app.delete("/wishlist/:id", async (req, res) => {
+      const id = req.params.id;
+
+      try {
+        const result = await wishlistCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+
+        console.log("Delete result:", result); // <--- helpful log
+
+        if (result.deletedCount > 0) {
+          res.send({ success: true, message: "Item removed from wishlist" });
+        } else {
+          res.status(404).send({ success: false, message: "Item not found" });
+        }
+      } catch (error) {
+        console.error("Error deleting wishlist item:", error);
+        res.status(500).send({ success: false, message: "Server error" });
+      }
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
