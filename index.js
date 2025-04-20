@@ -65,13 +65,7 @@ async function run() {
 
     // Blogs related api
     app.get("/blogs", async (req, res) => {
-      // const cursor = blogCollection.find();
-      // const result = await cursor.toArray();
-      // res.send(result);
-
       const { category, search } = req.query;
-      // console.log("category:", category);
-      // console.log("search:", search);
 
       const query = {};
 
@@ -157,7 +151,7 @@ async function run() {
       }
     });
 
-    // recent blogs for homepage
+    // recent blogs api for homepage blog section
     app.get("/recentBlogs", async (req, res) => {
       try {
         const blogs = await blogCollection
@@ -228,7 +222,6 @@ async function run() {
       }
     });
 
-    // wishlist delete API
     app.delete("/wishlist/:id", async (req, res) => {
       const id = req.params.id;
 
@@ -237,7 +230,7 @@ async function run() {
           _id: new ObjectId(id),
         });
 
-        console.log("Delete result:", result); // <--- helpful log
+        console.log("Delete result:", result);
 
         if (result.deletedCount > 0) {
           res.send({ success: true, message: "Item removed from wishlist" });
